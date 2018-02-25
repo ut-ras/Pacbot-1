@@ -1,21 +1,9 @@
 import socket
 import os
-from subscribe_pb2 import Subscribe
-from messages import *
-from enum import Enum
+from messages.subscribe_pb2 import Subscribe
+from messages import MsgType
+from messages import message_buffers
 from constants import _SUBSCRIBE, MAGIC_HEADER, SIZE_HEADER
-
-
-class MsgType(Enum):
-    LIGHT_STATE = 0
-    PACMAN_LOCATION = 1
-    FULL_STATE = 2
-
-message_buffers = {
-    MsgType.FULL_STATE: PacmanState,
-    MsgType.PACMAN_LOCATION: PacmanState.AgentState,
-    MsgType.LIGHT_STATE: LightState
-}
 
 
 def pack_msg(msg, msg_type):
