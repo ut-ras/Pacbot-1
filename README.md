@@ -11,9 +11,10 @@ cd ../botCode
 ./pacbotCommsModule.py
 ```
 
-then clone this repo and run the script
+then clone this repo, build the protobufs and run the script
 ```
 git clone https://github.com/ut-ras/Pacbot-1.git
 cd Pacbot-1
+make protobuf
 python3 client.py
 ```
