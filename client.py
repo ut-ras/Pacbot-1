@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import socket
 import os
 from messages.subscribe_pb2 import Subscribe
@@ -5,6 +7,8 @@ from messages.lightState_pb2 import LightState
 from messages import MsgType
 from messages import message_buffers
 import struct
+from messages import lightState_pb2
+from tcpcomms import Server
 
 _SUBSCRIBE = 15000
 MAGIC_HEADER = 17380
@@ -42,7 +46,8 @@ def msg_received(data, msg_type):
         msg.ParseFromString(data)
         # msg access syntax is in samplePacbotModule
         os.system("clear")
-        print(msg)
+        # 1print(msg)
+        return msg
 
 
 HOST = os.environ.get("LOCAL_ADDRESS", "localhost")
@@ -52,12 +57,15 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(addr)
 subscribe()
 
+server = Server(5005, lightState_pb2.LightState())
+
 while True:
     data = s.recv(2048)
-    magic, msg_type, length = SIZE_HEADER.unpack(
-        data[:SIZE_HEADER.size])
+    magic, msg_type, length = SIZE_HEADER.unpack(data[:SIZE_HEADER.size])
     buf = data[SIZE_HEADER.size:]
-    msg_received(buf[:length], msg_type)
-
-    x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
-    broadcastPos((x, y))
+    message = msg_received(buf[:length], msg_type)
+    server.send(message)
+    rec = server.receive()
+    broadcastPos((rec.pacman.x, rec.pacman.y))
+    #x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
+    #broadcastPos((x, y))
