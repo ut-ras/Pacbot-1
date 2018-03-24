@@ -30,7 +30,8 @@ class Server(TCPProto):
 
     def receive(self):
         length, = unpack('I', self.conn.recv(4))
-        return self.proto.ParseFromString(self.conn.recv(length))
+        self.proto.ParseFromString(self.conn.recv(length))
+        return self.proto
 
 
 class Client(TCPProto):
@@ -48,4 +49,5 @@ class Client(TCPProto):
 
     def receive(self):
         length, = unpack('I', self.sock.recv(4))
-        return self.proto.ParseFromString(self.sock.recv(length))
+        self.proto.ParseFromString(self.sock.recv(length))
+        return self.proto
