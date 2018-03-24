@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from messages import lightState_pb2
+from messages import pacmanState_pb2
 from tcpcomms import Client
 
 
@@ -10,7 +10,7 @@ def sendPos(pos):
     client.send(msg)
 
 
-client = Client(5005, lightState_pb2.LightState())
+client = Client(5005, pacmanState_pb2.PacmanState())
 while True:
     msg = client.receive()
     sendPos((10, 15))

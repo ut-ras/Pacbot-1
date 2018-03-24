@@ -8,8 +8,11 @@ class TCPProto:
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def close(self):
+    def __del__(self):
         self.sock.close()
+
+    def __repr__(self):
+        print("Host: " + self.host + " Port: " + str(self.port))
 
 
 class Server(TCPProto):

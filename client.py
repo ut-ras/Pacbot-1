@@ -5,9 +5,8 @@ import os
 from messages.subscribe_pb2 import Subscribe
 from messages.lightState_pb2 import LightState
 from messages import MsgType
-from messages import message_buffers
 import struct
-from messages import lightState_pb2
+from messages import pacmanState_pb2
 from tcpcomms import Server
 
 _SUBSCRIBE = 15000
@@ -28,7 +27,7 @@ def subscribe():
     # In production we'll use FULL_STATE for pellet locations, frightened timer,
     # and ghost directions. LIGHT_STATE is just for testing since it's
     # readable.
-    msg.msg_types.append(MsgType.LIGHT_STATE.value)
+    msg.msg_types.append(MsgType.FULL_STATE.value)
     msg.dir = 0
     s.send(pack_msg(msg.SerializeToString(), _SUBSCRIBE))
 
@@ -41,13 +40,9 @@ def broadcastPos(pos):
 
 
 def msg_received(data, msg_type):
-    if msg_type in (MsgType.FULL_STATE.value, MsgType.LIGHT_STATE.value):
-        msg = message_buffers[MsgType(msg_type)]()
-        msg.ParseFromString(data)
-        # msg access syntax is in samplePacbotModule
-        os.system("clear")
-        # 1print(msg)
-        return msg
+    msg = pacmanState_pb2.PacmanState()
+    msg.ParseFromString(data)
+    return msg
 
 
 HOST = os.environ.get("LOCAL_ADDRESS", "localhost")
@@ -57,15 +52,16 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(addr)
 subscribe()
 
-server = Server(5005, lightState_pb2.LightState())
+server = Server(5005, pacmanState_pb2.PacmanState())
 
 while True:
     data = s.recv(2048)
     magic, msg_type, length = SIZE_HEADER.unpack(data[:SIZE_HEADER.size])
     buf = data[SIZE_HEADER.size:]
-    message = msg_received(buf[:length], msg_type)
-    server.send(message)
-    rec = server.receive()
-    broadcastPos((rec.pacman.x, rec.pacman.y))
-    #x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
-    #broadcastPos((x, y))
+    if msg_type == MsgType.FULL_STATE.value:
+        message = msg_received(buf[:length], msg_type)
+        server.send(message)
+        rec = server.receive()
+        broadcastPos((rec.pacman.x, rec.pacman.y))
+        #x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
+        #broadcastPos((x, y))
