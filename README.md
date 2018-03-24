@@ -1,17 +1,14 @@
 # Pacbot-1
 
-First clone and run the pacbot server and communications scripts
+First clone and run the pacbot server and communications scripts (make sure to kill the server when you're done)
 ```
 git clone https://github.com/HarvardURC/Pacbot.git
 cd Pacbot/2017-2018/gameEngine
-./server.py
+./server.py &
 ./gameEngine.py
-cd ../botCode
-./server.py
-./pacbotCommsModule.py
 ```
 
-then clone this repo, build the protobufs and run the script
+then clone this repo, build the protobufs and run the test script
 ```
 git clone https://github.com/ut-ras/Pacbot-1.git
 cd Pacbot-1

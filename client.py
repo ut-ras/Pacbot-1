@@ -1,9 +1,14 @@
 import socket
 import os
 from messages.subscribe_pb2 import Subscribe
+from messages.lightState_pb2 import LightState
 from messages import MsgType
 from messages import message_buffers
-from constants import _SUBSCRIBE, MAGIC_HEADER, SIZE_HEADER
+import struct
+
+_SUBSCRIBE = 15000
+MAGIC_HEADER = 17380
+SIZE_HEADER = struct.Struct("!HHH")
 
 
 def pack_msg(msg, msg_type):
@@ -14,38 +19,45 @@ def pack_msg(msg, msg_type):
     return header + msg
 
 
-def subscribe(msg_types, direction):
-        msg = Subscribe()
-        '''
-        for msg_type in msg_types:
-            msg.msg_types.append(msg_type.value)
-        '''
-        msg.msg_types.append(MsgType.LIGHT_STATE.value)
-        msg.msg_types.append(MsgType.PACMAN_LOCATION.value)
-        msg.dir = direction
-        s.send(pack_msg(msg.SerializeToString(), _SUBSCRIBE))
+def subscribe():
+    msg = Subscribe()
+    # In production we'll use FULL_STATE for pellet locations, frightened timer,
+    # and ghost directions. LIGHT_STATE is just for testing since it's
+    # readable.
+    msg.msg_types.append(MsgType.LIGHT_STATE.value)
+    msg.dir = 0
+    s.send(pack_msg(msg.SerializeToString(), _SUBSCRIBE))
+
+
+def broadcastPos(pos):
+    msg = LightState.AgentState()
+    msg.x = pos[0]
+    msg.y = pos[1]
+    s.send(pack_msg(msg.SerializeToString(), MsgType.PACMAN_LOCATION))
 
 
 def msg_received(data, msg_type):
-        if msg_type != _SUBSCRIBE:
-            msg = message_buffers[MsgType(msg_type)]()
-            msg.ParseFromString(data)
-            # msg access syntax is in samplePacbotModule
-            print(msg)
+    if msg_type in (MsgType.FULL_STATE.value, MsgType.LIGHT_STATE.value):
+        msg = message_buffers[MsgType(msg_type)]()
+        msg.ParseFromString(data)
+        # msg access syntax is in samplePacbotModule
+        os.system("clear")
+        print(msg)
 
 
 HOST = os.environ.get("LOCAL_ADDRESS", "localhost")
 PORT = os.environ.get("BIND_PORT", 11297)
-
 addr = (HOST, PORT)
-
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(addr)
-print("connected")
-subscribe(MsgType, Subscribe.SUBSCRIBE)
+subscribe()
+
 while True:
     data = s.recv(2048)
     magic, msg_type, length = SIZE_HEADER.unpack(
-                        data[:SIZE_HEADER.size])
+        data[:SIZE_HEADER.size])
     buf = data[SIZE_HEADER.size:]
     msg_received(buf[:length], msg_type)
+
+    x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
+    broadcastPos((x, y))
