@@ -1,4 +1,4 @@
-# Pacbot-1
+# pb-Buster
 
 First clone and run the pacbot server and communications scripts (make sure to kill the server when you're done)
 ```
@@ -10,7 +10,7 @@ cd Pacbot/2017-2018/gameEngine
 
 then clone this repo, build the protobufs and run the test script
 ```
-git clone https://github.com/ut-ras/Pacbot-1.git
+git clone https://github.com/ut-ras/pb-Buster.git
 cd Pacbot-1
 make protobuf
 python3 client.py
