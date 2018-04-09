@@ -1,17 +1,15 @@
 # pb-Buster
 
-First clone and run the pacbot server and communications scripts (make sure to kill the server when you're done)
+First clone the Harvard Pacbot Repo
 ```
 git clone https://github.com/HarvardURC/Pacbot.git
-cd Pacbot/2017-2018/gameEngine
-./server.py &
-./gameEngine.py
 ```
+* In `Pacbot/2017-2018/gameEngine/pacbot/variables.py` change the `game_frequency` value to `4` or `5` to speed up the game
 
-then clone this repo, build the protobufs and run the test script
+then clone this repo alongside Harvard's repo, build the protobufs and run the simulation
 ```
 git clone https://github.com/ut-ras/pb-Buster.git
-cd Pacbot-1
+cd  pb-Buster
 make protobuf
-python3 client.py
+./run.py
 ```

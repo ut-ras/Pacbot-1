@@ -3,7 +3,6 @@
 import socket
 import os
 from messages.subscribe_pb2 import Subscribe
-from messages.lightState_pb2 import LightState
 from messages import MsgType
 import struct
 from messages import pacmanState_pb2
@@ -33,10 +32,11 @@ def subscribe():
 
 
 def broadcastPos(pos):
-    msg = LightState.AgentState()
-    msg.x = pos[0]
-    msg.y = pos[1]
-    s.send(pack_msg(msg.SerializeToString(), MsgType.PACMAN_LOCATION))
+    pos_buf = pacmanState_pb2.PacmanState.AgentState()
+    pos_buf.x = pos[0]
+    pos_buf.y = pos[1]
+    pos_buf.direction = 0
+    s.send(pack_msg(pos_buf.SerializeToString(), MsgType.PACMAN_LOCATION))
 
 
 def msg_received(data, msg_type):
@@ -63,5 +63,3 @@ while True:
         server.send(message)
         rec = server.receive()
         broadcastPos((rec.pacman.x, rec.pacman.y))
-        #x, y = map(int, raw_input("Input a new x y position for pacman: ").split())
-        #broadcastPos((x, y))

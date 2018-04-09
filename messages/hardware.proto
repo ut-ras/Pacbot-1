@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+message Move{
+  required MoveType move = 1;
+  required Position currentPos = 2;
+  required uint32 speed = 3;
+  optional bool clearQueue = 4 [default = false];
+  optional MovePosition moveposition = 5;
+  optional MoveUntil moveuntil = 6;
+  optional Direction orientation = 7;
+
+  message MovePosition {
+    required Direction direction = 1;
+    required uint32 distance = 2;
+  }
+
+  message MoveUntil {
+    required Direction direction = 1;
+  }
+
+  message Position {
+    required uint32 x = 1;
+    required uint32 y = 2;
+  }
+
+  enum MoveType {
+    POSITION = 0;
+    UNTIL = 1;
+  }
+
+  enum Direction {
+    UP = 0;
+    DOWN = 1;
+    LEFT = 2;
+    RIGHT = 3;
+    NONE = 4;
+  }
+}
