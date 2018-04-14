@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import pickle
+from time import sleep
+
 from messages import hardware_pb2
 from tcpcomms import Client
-from time import sleep
 
 DELAY = 0
 
@@ -11,7 +13,15 @@ def delay():
     sleep(DELAY)
 
 
-def inValid(x, y):
+def invalid(x, y):
+    """
+    if (grid[x][y] in ['G', '#']):
+        print("invalid")
+        return True
+    elif hardware.move == hardware_pb2.Move.UNTIL and hardware.moveuntil.stop:
+        print("invalid")
+        return True
+    """
     return False
 
 
@@ -38,37 +48,36 @@ def movePosition(currentPos, direction, distance):
 
 def moveUntil(currentPos, direction):
     x, y = currentPos
-    if (direction != hardware_pb2.Direction.NONE):
+    if (direction != hardware_pb2.Move.Direction.Value('NONE')):
         hardware.orientation = direction
         delay()
-    if (direction == hardware_pb2.Direction.WEST):
-        while True:
-            if (inValid(hardware.currentPos.x - 1, hardware.currentPos.y)):
-                break
-            hardware.currentPos.x -= 1
-            delay()
-    elif (direction == hardware_pb2.Direction.EAST):
-        while True:
-            if (inValid(hardware.currentPos.x + 1, hardware.currentPos.y)):
-                break
-            hardware.currentPos.x += 1
-            delay()
-    elif (direction == hardware_pb2.Direction.NORTH):
-        while True:
-            if (inValid(hardware.currentPos.x, hardware.currentPos.y + 1)):
-                break
-            hardware.currentPos.y += 1
-            delay()
-    elif (direction == hardware_pb2.Direction.SOUTH):
-        while True:
-            if (inValid(hardware.currentPos.x, hardware.currentPos.y - 1)):
-                break
-            hardware.currentPos.y -= 1
-            delay()
+    if (direction == hardware_pb2.Move.Direction.Value('LEFT')):
+        if (invalid(hardware.currentPos.x - 1, hardware.currentPos.y)):
+            return
+        hardware.currentPos.x -= 1
+        delay()
+    elif (direction == hardware_pb2.Move.Direction.Value('RIGHT')):
+        if (invalid(hardware.currentPos.x + 1, hardware.currentPos.y)):
+            return
+        hardware.currentPos.x += 1
+        delay()
+    elif (direction == hardware_pb2.Move.Direction.Value('UP')):
+        if (invalid(hardware.currentPos.x, hardware.currentPos.y + 1)):
+            return
+        hardware.currentPos.y += 1
+        delay()
+    elif (direction == hardware_pb2.Move.Direction.Value('DOWN')):
+        if (invalid(hardware.currentPos.x, hardware.currentPos.y - 1)):
+            return
+        hardware.currentPos.y -= 1
+        delay()
 
 
 client = Client(5006, hardware_pb2.Move())
 print("fakehal connected")
+sleep(1)
+with open('grid.pkl', 'rb') as f:
+    grid = pickle.load(f)
 while True:
     hardware = client.receive()
     if hardware.move == hardware_pb2.Move.POSITION:

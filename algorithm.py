@@ -13,7 +13,7 @@ class Algorithm(AlgorithmBase):
             self.PAUSED = True
         else:
             self.PAUSED = False
-        self.algorithm()
+        self.basicAlgorithm()
         print(self)
         self.server.send(self.hardware)
         self.hardware = self.server.receive()
@@ -21,30 +21,11 @@ class Algorithm(AlgorithmBase):
         self.gameState.pacman.y = self.hardware.currentPos.y
         self.client.send(self.gameState)
 
-    def algorithm(self):
-        self.directionTaken = '(' + str(self.pacx) + ',' + str(self.pacy) + ')'
-        pellet = ['.', 'o']
-        if (self.grid[self.pacx][self.pacy - 1] in pellet):
-            self.movePosition('LEFT', 1, 0)
-            self.directionTaken += 'LEFT'
-        elif (self.grid[self.pacx][self.pacy + 1] in pellet):
-            self.movePosition('RIGHT', 1, 0)
-            self.directionTaken += 'RIGHT'
-        elif (self.grid[self.pacx + 1][self.pacy] in pellet):
-            self.movePosition('DOWN', 1, 0)
-            self.directionTaken += 'DOWN'
-        elif (self.grid[self.pacx - 1][self.pacy] in pellet):
-            self.movePosition('UP', 1, 0)
-            self.directionTaken += 'UP'
-        elif (self.grid[self.pacx][self.pacy - 1] == ' '):
-            self.movePosition('LEFT', 1, 0)
-            self.directionTaken += 'LEFT'
-        elif (self.grid[self.pacx][self.pacy + 1] == ' '):
-            self.movePosition('RIGHT', 1, 0)
-            self.directionTaken += 'RIGHT'
-        elif (self.grid[self.pacx + 1][self.pacy] == ' '):
-            self.movePosition('DOWN', 1, 0)
-            self.directionTaken += 'DOWN'
-        elif (self.grid[self.pacx - 1][self.pacy] == ' '):
-            self.movePosition('UP', 1, 0)
-            self.directionTaken += 'UP'
+    def basicAlgorithm(self):
+        p_loc = (self.pacx, self.pacy)
+        path = self.bfs(p_loc, ['.', 'o'])
+        print(path)
+
+        if path is not None:
+            next_loc = path[1]
+            self.moveUntil(self._get_direction(p_loc, next_loc), 1)

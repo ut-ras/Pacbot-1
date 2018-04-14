@@ -1,4 +1,7 @@
-from messages import pacmanState_pb2, hardware_pb2
+import copy
+import pickle
+
+from messages import hardware_pb2, pacmanState_pb2
 from tcpcomms import Client, Server
 
 
@@ -55,6 +58,8 @@ class AlgorithmBase:
     def simInit(self):
         self.gameState = self.client.receive()
         self.updateGrid()
+        with open('grid.pkl', 'wb') as f:
+            pickle.dump(self.grid, f)
         self.client.send(self.gameState)
 
     def movePosition(self, direction, distance, speed, orientation='NONE'):
@@ -70,8 +75,60 @@ class AlgorithmBase:
         self.hardware.currentPos.x = self.gameState.pacman.x
         self.hardware.currentPos.y = self.gameState.pacman.y
         self.hardware.move = hardware_pb2.Move.UNTIL
-        self.hardware.moveposition.direction = hardware_pb2.Move.Direction.Value(
+        self.hardware.speed = speed
+        self.hardware.moveuntil.direction = hardware_pb2.Move.Direction.Value(
             direction)
+
+    def bfs(self, start, target, max_dist=float("inf")):
+        visited = []
+        queue = [(start, [])]
+
+        while len(queue) > 0:
+            nxt = queue.pop(0)
+            visited.append(nxt[0])
+            new_path = copy.deepcopy(nxt[1])
+            new_path.append(nxt[0])
+            loc = nxt[0]
+            if type(target) is tuple:
+                if target == loc:
+                    return new_path
+            elif self.grid[loc[0]][loc[1]] in target:
+                return new_path
+
+            if self.grid[loc[0] + 1][loc[1]] in [
+                    '.', 'o', ' '
+            ] and (loc[0] + 1,
+                   loc[1]) not in visited and len(new_path) <= max_dist:
+                queue.append(((loc[0] + 1, loc[1]), new_path))
+            if self.grid[loc[0] - 1][loc[1]] in [
+                    '.', 'o', ' '
+            ] and (loc[0] - 1,
+                   loc[1]) not in visited and len(new_path) <= max_dist:
+                queue.append(((loc[0] - 1, loc[1]), new_path))
+            if self.grid[loc[0]][loc[1] + 1] in [
+                    '.', 'o', ' '
+            ] and (loc[0],
+                   loc[1] + 1) not in visited and len(new_path) <= max_dist:
+                queue.append(((loc[0], loc[1] + 1), new_path))
+            if self.grid[loc[0]][loc[1] - 1] in [
+                    '.', 'o', ' '
+            ] and (loc[0],
+                   loc[1] - 1) not in visited and len(new_path) <= max_dist:
+                queue.append(((loc[0], loc[1] - 1), new_path))
+
+        return None
+
+    def _get_direction(self, p_loc, next_loc):
+        if p_loc[0] == next_loc[0]:
+            if p_loc[1] < next_loc[1]:
+                return "UP"
+            else:
+                return "DOWN"
+        else:
+            if p_loc[0] < next_loc[0]:
+                return "RIGHT"
+            else:
+                return "LEFT"
 
     def __str__(self):
         out = ''
@@ -80,5 +137,4 @@ class AlgorithmBase:
             out += '\n'
         out += '\nScore: ' + str(self.score) + '\nLives: ' + str(
             self.lives) + '\n'
-        out += 'direction taken: ' + self.directionTaken + '\n'
         return out

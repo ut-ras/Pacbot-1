@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from subprocess import Popen, PIPE, DEVNULL
-from time import sleep
-from algorithm import Algorithm
 import traceback
+from subprocess import DEVNULL, PIPE, Popen
+from time import sleep
+
+from algorithm import Algorithm
 
 
 def unpause():
@@ -33,6 +34,7 @@ try:
     print("simulation")
     sleep(0.5)
     count = 0
+    simulation.simInit()
     while True:
         simulation.tick()
         if (simulation.PAUSED is True):
