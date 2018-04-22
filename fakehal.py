@@ -14,14 +14,12 @@ def delay():
 
 
 def invalid(x, y):
-    """
     if (grid[x][y] in ['G', '#']):
         print("invalid")
         return True
     elif hardware.move == hardware_pb2.Move.UNTIL and hardware.moveuntil.stop:
         print("invalid")
         return True
-    """
     return False
 
 
