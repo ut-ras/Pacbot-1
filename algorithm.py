@@ -13,7 +13,11 @@ class Algorithm(AlgorithmBase):
             self.PAUSED = True
         else:
             self.PAUSED = False
-        self.basicAlgorithm()
+        if (self.gameState.mode == pacmanState_pb2.PacmanState.FRIGHTENED):
+            self.FRIGHTENED = True
+        else:
+            self.FRIGHTENED = False
+        self.betterAlgorithm()
         print(self)
         self.server.send(self.hardware)
         self.hardware = self.server.receive()
@@ -29,3 +33,20 @@ class Algorithm(AlgorithmBase):
         if path is not None:
             next_loc = path[1]
             self.movePosition(self._get_direction(p_loc, next_loc), 1, 1)
+
+    def betterAlgorithm(self):
+        p_loc = (self.pacx, self.pacy)
+        power_path = self.bfs(p_loc, ['o'])
+        ghost_path = self.bfs(p_loc, ['G'])
+        path = self.bfs(p_loc, ['.'])
+        print(path)
+
+        if ((ghost_path is not None) and self.FRIGHTENED):
+            next_loc = ghost_path[1]
+        elif power_path is not None:
+            next_loc = power_path[1]
+        elif path is not None:
+            next_loc = path[1]
+        else:
+            next_loc = p_loc
+        self.movePosition(self._get_direction(p_loc, next_loc), 1, 1)

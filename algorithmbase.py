@@ -13,6 +13,7 @@ class AlgorithmBase:
         self.gameState = pacmanState_pb2.PacmanState()
         self.hardware = hardware_pb2.Move()
         self.PAUSED = False
+        self.FRIGHTENED = False
         self.grid = []
         self.score = 0
         self.lives = 3
@@ -54,6 +55,12 @@ class AlgorithmBase:
                 col_index += 1
                 self.grid.append(row)
                 row = []
+        self.power_locs = []
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[i])):
+                if(self.grid[i][j] == 'o'):
+                    self.power_locs.append((i, j))
+
         """
         movable = ['.', ' ']
         for i in range(1, len(self.grid) - 1):
@@ -86,6 +93,12 @@ class AlgorithmBase:
         self.hardware.moveuntil.direction = hardware_pb2.Move.Direction.Value(
             direction)
 
+    def noGhost(self, path):
+        for coord in path:
+            if(self.grid[coord[0]][coord[1]] == 'G'):
+                return False
+        return True
+
     def bfs(self, start, target, max_dist=float("inf")):
         visited = []
         queue = [(start, [])]
@@ -100,25 +113,28 @@ class AlgorithmBase:
                 if target == loc:
                     return new_path
             elif self.grid[loc[0]][loc[1]] in target:
-                return new_path
+                if(self.FRIGHTENED):
+                    return new_path
+                elif(self.noGhost(new_path)):
+                    return new_path
 
             if self.grid[loc[0] + 1][loc[1]] in [
-                    '.', 'o', ' '
+                    '.', 'o', ' ', 'G'
             ] and (loc[0] + 1,
                    loc[1]) not in visited and len(new_path) <= max_dist:
                 queue.append(((loc[0] + 1, loc[1]), new_path))
             if self.grid[loc[0] - 1][loc[1]] in [
-                    '.', 'o', ' '
+                    '.', 'o', ' ', 'G'
             ] and (loc[0] - 1,
                    loc[1]) not in visited and len(new_path) <= max_dist:
                 queue.append(((loc[0] - 1, loc[1]), new_path))
             if self.grid[loc[0]][loc[1] + 1] in [
-                    '.', 'o', ' '
+                    '.', 'o', ' ', 'G'
             ] and (loc[0],
                    loc[1] + 1) not in visited and len(new_path) <= max_dist:
                 queue.append(((loc[0], loc[1] + 1), new_path))
             if self.grid[loc[0]][loc[1] - 1] in [
-                    '.', 'o', ' '
+                    '.', 'o', ' ', 'G'
             ] and (loc[0],
                    loc[1] - 1) not in visited and len(new_path) <= max_dist:
                 queue.append(((loc[0], loc[1] - 1), new_path))
@@ -144,4 +160,5 @@ class AlgorithmBase:
             out += '\n'
         out += '\nScore: ' + str(self.score) + '\nLives: ' + str(
             self.lives) + '\n'
+        out += 'FRIGHTENED: ' + str(self.FRIGHTENED) + '\n'
         return out
