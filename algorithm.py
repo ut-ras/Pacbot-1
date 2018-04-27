@@ -23,9 +23,9 @@ class Algorithm(AlgorithmBase):
 
     def basicAlgorithm(self):
         p_loc = (self.pacx, self.pacy)
-        path = self.bfs(p_loc, ['.', 'o'])
+        path = self.bfs(p_loc, ['o'])
         print(path)
 
         if path is not None:
             next_loc = path[1]
-            self.moveUntil(self._get_direction(p_loc, next_loc), 1)
+            self.movePosition(self._get_direction(p_loc, next_loc), 1, 1)

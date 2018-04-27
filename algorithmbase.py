@@ -16,7 +16,7 @@ class AlgorithmBase:
         self.grid = []
         self.score = 0
         self.lives = 3
-        ## DEBUG
+        # DEBUG
         self.directionTaken = 'NONE'
 
     def updateGrid(self):
@@ -54,6 +54,13 @@ class AlgorithmBase:
                 col_index += 1
                 self.grid.append(row)
                 row = []
+        """
+        movable = ['.', ' ']
+        for i in range(1, len(self.grid) - 1):
+            for j in range(1, len(self.grid[i]) - 1):
+                if(self.grid[i][j] in movable and self.grid[i - 1][j] in movable and self.grid[i + 1][j] in movable and self.grid[i][j - 1] in movable and self.grid[i][j + 1] in movable):
+                    self.grid[i][j] = '#'
+        """
 
     def simInit(self):
         self.gameState = self.client.receive()

@@ -23,52 +23,52 @@ def invalid(x, y):
     return False
 
 
-def movePosition(currentPos, direction, distance):
-    x, y = currentPos
+def movePosition(direction, distance, speed=1):
     if (distance > 0):
-        if (direction == hardware_pb2.Move.Direction.Value('UP')):
-            for i in range(0, distance):
-                hardware.currentPos.x -= 1
-                delay()
-        elif (direction == hardware_pb2.Move.Direction.Value('DOWN')):
-            for i in range(0, distance):
-                hardware.currentPos.x += 1
-                delay()
+        if (direction != hardware_pb2.Move.Direction.Value('NONE')):
+            hardware.orientation = direction
+            delay()
+        if (direction == hardware_pb2.Move.Direction.Value('LEFT')):
+            if (invalid(hardware.currentPos.x - 1, hardware.currentPos.y)):
+                return
+            hardware.currentPos.x -= 1
+            delay()
         elif (direction == hardware_pb2.Move.Direction.Value('RIGHT')):
-            for i in range(0, distance):
-                hardware.currentPos.y += 1
-                delay()
-        elif (direction == hardware_pb2.Move.Direction.Value('LEFT')):
-            for i in range(0, distance):
-                hardware.currentPos.y -= 1
-                delay()
+            if (invalid(hardware.currentPos.x + 1, hardware.currentPos.y)):
+                return
+            hardware.currentPos.x += 1
+            delay()
+        elif (direction == hardware_pb2.Move.Direction.Value('UP')):
+            if (invalid(hardware.currentPos.x, hardware.currentPos.y + 1)):
+                return
+            hardware.currentPos.y += 1
+            delay()
+        elif (direction == hardware_pb2.Move.Direction.Value('DOWN')):
+            if (invalid(hardware.currentPos.x, hardware.currentPos.y - 1)):
+                return
+            hardware.currentPos.y -= 1
 
 
-def moveUntil(currentPos, direction):
-    x, y = currentPos
+def moveUntil(direction, speed=1):
     if (direction != hardware_pb2.Move.Direction.Value('NONE')):
         hardware.orientation = direction
         delay()
     if (direction == hardware_pb2.Move.Direction.Value('LEFT')):
-        if (invalid(hardware.currentPos.x - 1, hardware.currentPos.y)):
-            return
-        hardware.currentPos.x -= 1
-        delay()
+        while(not invalid(hardware.currentPos.x - 1, hardware.currentPos.y)):
+            hardware.currentPos.x -= 1
+            delay()
     elif (direction == hardware_pb2.Move.Direction.Value('RIGHT')):
-        if (invalid(hardware.currentPos.x + 1, hardware.currentPos.y)):
-            return
-        hardware.currentPos.x += 1
-        delay()
+        while(not invalid(hardware.currentPos.x + 1, hardware.currentPos.y)):
+            hardware.currentPos.x += 1
+            delay()
     elif (direction == hardware_pb2.Move.Direction.Value('UP')):
-        if (invalid(hardware.currentPos.x, hardware.currentPos.y + 1)):
-            return
-        hardware.currentPos.y += 1
-        delay()
+        while(not invalid(hardware.currentPos.x, hardware.currentPos.y + 1)):
+            hardware.currentPos.y += 1
+            delay()
     elif (direction == hardware_pb2.Move.Direction.Value('DOWN')):
-        if (invalid(hardware.currentPos.x, hardware.currentPos.y - 1)):
-            return
-        hardware.currentPos.y -= 1
-        delay()
+        while(not invalid(hardware.currentPos.x, hardware.currentPos.y - 1)):
+            hardware.currentPos.y -= 1
+            delay()
 
 
 client = Client(5006, hardware_pb2.Move())
@@ -79,10 +79,8 @@ with open('grid.pkl', 'rb') as f:
 while True:
     hardware = client.receive()
     if hardware.move == hardware_pb2.Move.POSITION:
-        movePosition((hardware.currentPos.x, hardware.currentPos.y),
-                     hardware.moveposition.direction,
+        movePosition(hardware.moveposition.direction,
                      hardware.moveposition.distance)
     elif hardware.move == hardware_pb2.Move.UNTIL:
-        moveUntil((hardware.currentPos.x, hardware.currentPos.y),
-                  hardware.moveuntil.direction)
+        moveUntil(hardware.moveuntil.direction)
     client.send(hardware)
