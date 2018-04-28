@@ -25,6 +25,21 @@ class Algorithm(AlgorithmBase):
         self.gameState.pacman.y = self.hardware.currentPos.y
         self.client.send(self.gameState)
 
+    def competition_tick(self):
+        self.gameState = self.client.receive()
+        self.updateGrid()
+        if (self.gameState.mode == pacmanState_pb2.PacmanState.PAUSED):
+            self.PAUSED = True
+        else:
+            self.PAUSED = False
+        if (self.gameState.mode == pacmanState_pb2.PacmanState.FRIGHTENED):
+            self.FRIGHTENED = True
+        else:
+            self.FRIGHTENED = False
+        self.betterAlgorithm()
+        print(self)
+        self.server.send(self.hardware)
+
     def basicAlgorithm(self):
         p_loc = (self.pacx, self.pacy)
         path = self.bfs(p_loc, ['o'])

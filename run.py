@@ -77,6 +77,22 @@ try:
                     bot_unpause()
                     simulation.simInit()
                     simulation.PAUSED = False
+        elif (sys.argv[1] == 'competition'):
+            runMode = 2
+            c = Popen('exec ./client.py', shell=True)
+            sleep(1)
+            f = Popen('exec ./fakehal.py', shell=True)
+            simulation = Algorithm()
+            print("competition")
+            sleep(1.5)
+            simulation.compInit()
+            while True:
+                simulation.competition_tick()
+                if (simulation.PAUSED is True):
+                    while(simulation.update_pause()):
+                        sleep(0.5)
+                    simulation.compInit()
+                    simulation.PAUSED = False
     else:
         s = Popen(
             "exec ./../Pacbot/2017-2018/gameEngine/server.py", shell=True)

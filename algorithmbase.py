@@ -12,7 +12,7 @@ class AlgorithmBase:
         print("algorithm server")
         self.gameState = pacmanState_pb2.PacmanState()
         self.hardware = hardware_pb2.Move()
-        self.PAUSED = False
+        self.PAUSED = True
         self.FRIGHTENED = False
         self.grid = []
         self.score = 0
@@ -55,12 +55,6 @@ class AlgorithmBase:
                 col_index += 1
                 self.grid.append(row)
                 row = []
-        self.power_locs = []
-        for i in range(len(self.grid)):
-            for j in range(len(self.grid[i])):
-                if(self.grid[i][j] == 'o'):
-                    self.power_locs.append((i, j))
-
         """
         movable = ['.', ' ']
         for i in range(1, len(self.grid) - 1):
@@ -75,6 +69,18 @@ class AlgorithmBase:
         with open('grid.pkl', 'wb') as f:
             pickle.dump(self.grid, f)
         self.client.send(self.gameState)
+
+    def compInit(self):
+        self.gameState = self.client.receive()
+        self.updateGrid()
+
+    def update_pause(self):
+        self.gameState = self.client.receive()
+        if (self.gameState.mode == pacmanState_pb2.PacmanState.PAUSED):
+            self.PAUSED = True
+        else:
+            self.PAUSED = False
+        return self.PAUSED
 
     def movePosition(self, direction, distance, speed, orientation='NONE'):
         self.hardware.currentPos.x = self.gameState.pacman.x

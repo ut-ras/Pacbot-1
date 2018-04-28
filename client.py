@@ -54,11 +54,16 @@ subscribe()
 
 server = Server(5005, pacmanState_pb2.PacmanState())
 
+competition = True
 while True:
     data = s.recv(2048)
     magic, msg_type, length = SIZE_HEADER.unpack(data[:SIZE_HEADER.size])
     buf = data[SIZE_HEADER.size:]
-    if msg_type == MsgType.FULL_STATE.value:
+    if (competition is True):
+        if msg_type == MsgType.FULL_STATE.value:
+            message = msg_received(buf[:length], msg_type)
+            server.send(message)
+    elif msg_type == MsgType.FULL_STATE.value:
         message = msg_received(buf[:length], msg_type)
         server.send(message)
         rec = server.receive()
